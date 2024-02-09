@@ -6,8 +6,8 @@
     Author:      alfacoins
     Author URI:  https://github.com/alfacoins
 
-    Version:           0.10
-    License:           Copyright 2013-2017 ALFAcoins Inc., MIT License
+    Version:           1.0
+    License:           Copyright 2013-2024 ALFAcoins Inc., MIT License
  */
 
 // Exit if accessed directly
@@ -19,7 +19,8 @@ if (FALSE === defined('ABSPATH')) {
 add_action('plugins_loaded', 'woocommerce_alfacoins_init', 0);
 register_activation_hook(__FILE__, 'woocommerce_alfacoins_activate');
 
-function woocommerce_alfacoins_init() {
+function woocommerce_alfacoins_init()
+{
   if (TRUE === class_exists('WC_Gateway_ALFAcoins')) {
     return;
   }
@@ -28,20 +29,42 @@ function woocommerce_alfacoins_init() {
     return;
   }
 
-  class WC_Gateway_ALFAcoins extends WC_Payment_Gateway {
+  class WC_Gateway_ALFAcoins extends WC_Payment_Gateway
+  {
     private $is_initialized = FALSE;
+    public $gates = [
+        'all' => 'All available methods',
+        'bitcoin' => 'Bitcoin',
+        'ethereum' => 'Ethereum',
+        'xrp' => 'XRP',
+        'bitcoincash' => 'Bitcoin Cash',
+        'litecoin' => 'Litecoin',
+        'dash' => 'Dash',
+        'tethererc20' => 'ERC-20 USDT',
+        'usdcoin' => 'ERC-20 USD Coin',
+        'erc20dai' => 'ERC-20 DAI',
+        'tron' => 'Tron',
+        'trc20usdt' => 'TRC-20 USDT',
+        'stellar' => 'Stellar',
+        'polkadot' => 'Polkadot',
+        'dogecoin' => 'Dogecoin',
+        'cosmos' => 'Cosmos',
+        'smartchain' => 'Binance Smart Chain',
+        'litecointestnet' => 'Litecoin Testnet'
+    ];
 
     /**
      * Constructor for the gateway.
      */
-    public function __construct() {
+    public function __construct()
+    {
       // General
       $this->id = 'alfacoins';
       $this->icon = plugin_dir_url(__FILE__) . 'assets/img/icon.png';
       $this->has_fields = FALSE;
-      $this->order_button_text = __('Pay with ALFAcoins', 'alfacoins');
+      $this->order_button_text = __('Pay with Cryptocurrency', 'alfacoins');
       $this->method_title = 'ALFAcoins';
-      $this->method_description = 'ALFAcoins allows you to accept bitcoin, litecoin, ethereum, bitcoin cash, dash, xrp and litecoin testnet payments on your WooCommerce store.';
+      $this->method_description = 'Start accepting cryptocurrency with ease. Bitcoin, XRP, Ethereum, Tron, USDT and many more.';
 
       // Load the settings.
       $this->init_form_fields();
@@ -66,10 +89,10 @@ function woocommerce_alfacoins_init() {
 
       $this->log('ALFAcoins Woocommerce payment plugin object constructor called. Plugin is v' . $this->debug_plugin_version . ' and server is PHP v' . $this->debug_php_version);
       $this->log('    [Info] $this->api_name           = ' . $this->api_name);
-      $this->log('    [Info] $this->api_secret_key     = ' . $this->api_secret_key);
-      $this->log('    [Info] $this->api_password       = ' . $this->api_password);
-      $this->log('    [Info] $this->api_url           = ' . $this->api_url);
-      $this->log('    [Info] $this->api_type_new           = ' . $this->api_type_new);
+      $this->log('    [Info] $this->api_secret_key     = ' . substr($this->api_secret_key, 0, 1) . '...' . substr($this->api_secret_key, -1));
+      $this->log('    [Info] $this->api_password       = ' . substr($this->api_password, 0, 1) . '...' . substr($this->api_password, -1));
+      $this->log('    [Info] $this->api_url            = ' . $this->api_url);
+      $this->log('    [Info] $this->api_type_new       = ' . $this->api_type_new);
 
       // Actions
       add_action('woocommerce_update_options_payment_gateways_' . $this->id, array(
@@ -86,8 +109,7 @@ function woocommerce_alfacoins_init() {
       if (FALSE === $this->is_valid_for_use()) {
         $this->enabled = 'no';
         $this->log('    [Info] The plugin is NOT valid for use!');
-      }
-      else {
+      } else {
         $this->enabled = 'yes';
         $this->log('    [Info] The plugin is ok to use.');
         add_action('woocommerce_api_wc_gateway_alfacoins', array(
@@ -99,24 +121,23 @@ function woocommerce_alfacoins_init() {
       $this->is_initialized = TRUE;
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
     }
 
-    public function is_valid_for_use() {
+    public function is_valid_for_use()
+    {
       // Check that API credentials are set
-      if (empty($this->api_name) ||
+      if (
+        empty($this->api_name) ||
         empty($this->api_secret_key) ||
         empty($this->api_password) ||
         empty($this->api_type_new)
       ) {
-        return FALSE;
+          $this->log('    [Info] Plugin is not valid for use - please review settings.');
+
+          return FALSE;
       }
-
-      /*if (!in_array(get_woocommerce_currency(), array('USD', 'EUR'))) {
-        $this->log('    [Error] In is_valid_for_use not USD/EUR ');
-
-        return FALSE;
-      }*/
 
       $this->log('    [Info] Plugin is valid for use.');
 
@@ -126,8 +147,8 @@ function woocommerce_alfacoins_init() {
     /**
      * Initialise Gateway Settings Form Fields
      */
-    public function init_form_fields() {
-      $this->log('    [Info] Entered init_form_fields()...');
+    public function init_form_fields()
+    {
       $log_file = 'alfacoins-' . sanitize_file_name(wp_hash('alfacoins')) . '-log';
       $logs_href = get_bloginfo('wpurl') . '/wp-admin/admin.php?page=wc-status&tab=logs&log_file=' . $log_file;
 
@@ -142,14 +163,14 @@ function woocommerce_alfacoins_init() {
           'title' => __('Title', 'alfacoins'),
           'type' => 'text',
           'description' => __('Controls the name of this payment method as displayed to the customer during checkout.', 'alfacoins'),
-          'default' => __('ALFAcoins', 'alfacoins'),
+          'default' => __('Pay with Cryptocurrency', 'alfacoins'),
           'desc_tip' => TRUE,
         ),
         'description' => array(
           'title' => __('Customer Message', 'alfacoins'),
           'type' => 'textarea',
           'description' => __('Message to explain how the customer will be paying for the purchase.', 'alfacoins'),
-          'default' => 'You will be redirected to alfacoins.com to complete your purchase.',
+          'default' => 'Embrace the future of payments and experience the ease and speed of cryptocurrency transactions',
           'desc_tip' => TRUE,
         ),
         'api_url' => array(
@@ -187,17 +208,9 @@ function woocommerce_alfacoins_init() {
         'api_type_new' => array(
           'title' => __('Default coin', 'alfacoins'),
           'type' => 'select',
-          'default' => 'bitcoin',
+          'default' => 'all',
           'description' => __('Default coin picked in payment method, you can use all or only one - can configure it in ALFAcoins API settings page', 'alfacoins'),
-          'options' => array(
-            'bitcoin' => 'Bitcoin',
-            'litecoin' => 'Litecoin',
-            'ethereum' => 'Ethereum',
-            'bitcoincash' => 'Bitcoin Cash',
-            'dash' => 'Dash',
-            'xrp' => 'XRP',
-            'litecointestnet' => 'Litecoin Testnet'
-          ),
+          'options' => $this->gates,
           'desc_tip' => TRUE,
         ),
         'order_states' => array(
@@ -216,7 +229,6 @@ function woocommerce_alfacoins_init() {
           'type' => 'url',
           'description' => __('ALFAcoins will send IPNs for orders to this URL with the ALFAcoins invoice data', 'alfacoins'),
           'default' => WC()->api_request_url('WC_Gateway_ALFAcoins'),
-          //'placeholder' => WC()->api_request_url('WC_Gateway_ALFAcoins'),
           'desc_tip' => TRUE,
         ),
         'redirect_url' => array(
@@ -224,7 +236,6 @@ function woocommerce_alfacoins_init() {
           'type' => 'url',
           'description' => __('After paying the ALFAcoins invoice, users will be redirected back to this URL', 'alfacoins'),
           'default' => $this->get_return_url(),
-          //'placeholder' => $this->get_return_url(),
           'desc_tip' => TRUE,
         ),
         'hide_warning' => array(
@@ -233,24 +244,113 @@ function woocommerce_alfacoins_init() {
           'label' => __('Hide invoice deposit warning (e.g. warning about bitcoin low fee or requirement of xrp destination tag) (use at your own risk!)', 'alfacoins'),
           'default' => 'no'
         ),
+        'icon_description' => array(
+            'title' => __('Enable or disable icon visibility at checkout page', 'alfacoins'),
+            'type' => 'title',
+        ),
+        'enable_bitcoin_icon' => array(
+          'title' => __('Bitcoin', 'alfacoins'),
+          'type' => 'checkbox',
+          'label' => __('Enable icon for Bitcoin at checkout page', 'alfacoins'),
+          'default' => 'yes'
+        ),
+        'enable_ethereum_icon' => array(
+            'title' => __('Ethereum', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Ethereum at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_erc20usdt_icon' => array(
+            'title' => __('USDT', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for USDT at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_dai_icon' => array(
+            'title' => __('DAI', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for DAI at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_usdc_icon' => array(
+            'title' => __('USDC', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for USDC at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_xrp_icon' => array(
+            'title' => __('XRP', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for XRP at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_tron_icon' => array(
+            'title' => __('Tron', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Tron at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_smartchain_icon' => array(
+            'title' => __('Binance Smart Chain', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Binance Smart Chain at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_litecoin_icon' => array(
+            'title' => __('Litecoin', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Litecoin at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_dogecoin_icon' => array(
+            'title' => __('Dogecoin', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Dogecoin at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_bitcoincash_icon' => array(
+            'title' => __('Bitcoin Cash', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Bitcoin Cash at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_cardano_icon' => array(
+            'title' => __('Cardano', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Cardano at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_polkadot_icon' => array(
+            'title' => __('Polkadot', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Polkadot at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_stellar_icon' => array(
+            'title' => __('Stellar', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Stellar at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
+        'enable_cosmos_icon' => array(
+            'title' => __('Cosmos', 'alfacoins'),
+            'type' => 'checkbox',
+            'label' => __('Enable icon for Cosmos at checkout page', 'alfacoins'),
+            'default' => 'yes'
+        ),
         'support_details' => array(
           'title' => __('Plugin & Support Information', 'alfacoins'),
           'type' => 'title',
-          'description' => sprintf(__('This plugin version is %s and your PHP version is %s. If you need assistance, please contact support@alfacoins.com.  Thank you for using ALFAcoins!', 'alfacoins'), get_option('woocommerce_alfacoins_version'), PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION),
+          'description' => sprintf(__('This plugin version is %s and your PHP version is %s. If you need assistance, please contact support@alfacoins.com, or by telegram @alfacoins_support_bot. Thank you for using ALFAcoins!', 'alfacoins'), get_option('woocommerce_alfacoins_version'), PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION),
         ),
-
       );
-
-      $this->log('    [Info] Initialized form fields: ' . var_export($this->form_fields, TRUE));
-      $this->log('    [Info] Leaving init_form_fields()...');
     }
 
     /**
      * HTML output for form field type `order_states`
      */
-    public function generate_order_states_html() {
-      $this->log('    [Info] Entered generate_order_states_html()...');
-
+    public function generate_order_states_html()
+    {
       ob_start();
 
       $ac_statuses = array(
@@ -268,7 +368,7 @@ function woocommerce_alfacoins_init() {
 
       $wc_statuses = wc_get_order_statuses();
 
-      ?>
+?>
       <tr valign="top">
         <th scope="row" class="titledesc">Order States:</th>
         <td class="forminp" id="alfacoins_order_states">
@@ -276,12 +376,11 @@ function woocommerce_alfacoins_init() {
             <?php
 
             foreach ($ac_statuses as $ac_state => $ac_name) {
-              ?>
+            ?>
               <tr>
                 <th><?php echo $ac_name; ?></th>
                 <td>
-                  <select
-                    name="woocommerce_alfacoins_order_states[<?php echo $ac_state; ?>]">
+                  <select name="woocommerce_alfacoins_order_states[<?php echo $ac_state; ?>]">
                     <?php
 
                     $order_states = get_option('woocommerce_alfacoins_settings');
@@ -295,8 +394,7 @@ function woocommerce_alfacoins_init() {
 
                       if ($current_option === $wc_state) {
                         echo "<option value=\"$wc_state\" selected>$wc_name</option>\n";
-                      }
-                      else {
+                      } else {
                         echo "<option value=\"$wc_state\">$wc_name</option>\n";
                       }
                     }
@@ -312,9 +410,7 @@ function woocommerce_alfacoins_init() {
           </table>
         </td>
       </tr>
-      <?php
-
-      $this->log('    [Info] Leaving generate_order_states_html()...');
+<?php
 
       return ob_get_clean();
     }
@@ -322,9 +418,8 @@ function woocommerce_alfacoins_init() {
     /**
      * Save order states
      */
-    public function save_order_states() {
-      $this->log('    [Info] Entered save_order_states()...');
-
+    public function save_order_states()
+    {
       $ac_statuses = array(
         'new' => 'New Order',
         'paid' => 'Paid',
@@ -350,35 +445,33 @@ function woocommerce_alfacoins_init() {
             $this->log('    [Info] Updating order state ' . $ac_state . ' to ' . $wc_state);
             $order_states[$ac_state] = $wc_state;
           }
-
         }
         $ac_settings['order_states'] = $order_states;
         update_option('woocommerce_alfacoins_settings', $ac_settings);
       }
-
-      $this->log('    [Info] Leaving save_order_states()...');
     }
 
     /**
      * Validate API Type (Default Coin)
      */
-    public function validate_api_type_new_field($key) {
+    public function validate_api_type_new_field($key)
+    {
       $type = $this->get_option($key);
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
-        if (!in_array($_POST[$this->plugin_id . $this->id . '_' . $key], array('bitcoin', 'litecoin', 'ethereum', 'bitcoincash', 'dash', 'xrp', 'litecointestnet'))) {
-          $type = 'bitcoin';
+        if (!in_array($_POST[$this->plugin_id . $this->id . '_' . $key], array_keys($this->gates))) {
+          $type = 'all';
         } else {
           $type = $_POST[$this->plugin_id . $this->id . '_' . $key];
         }
       }
       return sanitize_text_field($type);
-
     }
 
     /**
      * Validate API Password
      */
-    public function validate_api_password_field($key) {
+    public function validate_api_password_field($key)
+    {
       $password = $this->get_option($key);
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
         $val = $_POST[$this->plugin_id . $this->id . '_' . $key];
@@ -398,13 +491,13 @@ function woocommerce_alfacoins_init() {
     /**
      * Validate API Secret KEY
      */
-    public function validate_api_secret_key_field($key) {
+    public function validate_api_secret_key_field($key)
+    {
       $secret_key = $this->get_option($key);
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
         if (!preg_match('/^[a-f0-9]{32}$/', $_POST[$this->plugin_id . $this->id . '_' . $key])) {
           $secret_key = '';
-        }
-        else {
+        } else {
           // always lowercase
           $secret_key = preg_replace('/[^\da-z]/', '', $_POST[$this->plugin_id . $this->id . '_' . $key]);
         }
@@ -415,26 +508,26 @@ function woocommerce_alfacoins_init() {
     /**
      * Validate API Name
      */
-    public function validate_api_name_field($key) {
+    public function validate_api_name_field($key)
+    {
       $name = $this->get_option($key);
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
         $name = $_POST[$this->plugin_id . $this->id . '_' . $key];
       }
       return sanitize_text_field($name);
-
     }
 
     /**
      * Validate API URL
      */
-    public function validate_api_url_field($key) {
+    public function validate_api_url_field($key)
+    {
       $url = $this->get_option($key);
 
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
         if (filter_var($_POST[$this->plugin_id . $this->id . '_' . $key], FILTER_VALIDATE_URL) !== FALSE) {
-          $url = esc_url_raw($_POST[$this->plugin_id . $this->id . '_' . $key],array('http','https'));
-        }
-        else {
+          $url = esc_url_raw($_POST[$this->plugin_id . $this->id . '_' . $key], array('http', 'https'));
+        } else {
           $url = '';
         }
       }
@@ -445,7 +538,8 @@ function woocommerce_alfacoins_init() {
     /**
      * Validate Customer Message
      */
-    public function validate_description_field($key) {
+    public function validate_description_field($key)
+    {
       $desc = $this->get_option($key);
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
         $desc = $_POST[$this->plugin_id . $this->id . '_' . $key];
@@ -456,7 +550,8 @@ function woocommerce_alfacoins_init() {
     /**
      * Validate Title
      */
-    public function validate_title_field($key) {
+    public function validate_title_field($key)
+    {
       $title = $this->get_option($key);
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
         $title = $_POST[$this->plugin_id . $this->id . '_' . $key];
@@ -467,13 +562,14 @@ function woocommerce_alfacoins_init() {
     /**
      * Validate Order States
      */
-    public function validate_order_states_field($key) {
+    public function validate_order_states_field($key)
+    {
       $order_states = $this->get_option($key);
 
       if (isset($_POST[$this->plugin_id . $this->id . '_order_states'])) {
         $order_states = $_POST[$this->plugin_id . $this->id . '_order_states'];
         if (!empty($order_states) && is_array($order_states)) {
-          foreach ($order_states as $key=>$val) {
+          foreach ($order_states as $key => $val) {
             $order_states[$key] = sanitize_text_field($val);
           }
         }
@@ -484,14 +580,14 @@ function woocommerce_alfacoins_init() {
     /**
      * Validate Notification URL
      */
-    public function validate_url_field($key) {
+    public function validate_url_field($key)
+    {
       $url = $this->get_option($key);
 
       if (isset($_POST[$this->plugin_id . $this->id . '_' . $key])) {
         if (filter_var($_POST[$this->plugin_id . $this->id . '_' . $key], FILTER_VALIDATE_URL) !== FALSE) {
-          $url = esc_url_raw($_POST[$this->plugin_id . $this->id . '_' . $key],array('http','https'));
-        }
-        else {
+          $url = esc_url_raw($_POST[$this->plugin_id . $this->id . '_' . $key], array('http', 'https'));
+        } else {
           $url = '';
         }
       }
@@ -501,14 +597,14 @@ function woocommerce_alfacoins_init() {
     /**
      * Validate Redirect URL
      */
-    public function validate_redirect_url_field() {
+    public function validate_redirect_url_field()
+    {
       $redirect_url = $this->get_option('redirect_url', '');
 
       if (isset($_POST['woocommerce_alfacoins_redirect_url'])) {
         if (filter_var($_POST['woocommerce_alfacoins_redirect_url'], FILTER_VALIDATE_URL) !== FALSE) {
-          $redirect_url = esc_url_raw($_POST['woocommerce_alfacoins_redirect_url'],array('http','https'));
-        }
-        else {
+          $redirect_url = esc_url_raw($_POST['woocommerce_alfacoins_redirect_url'], array('http', 'https'));
+        } else {
           $redirect_url = '';
         }
       }
@@ -518,12 +614,9 @@ function woocommerce_alfacoins_init() {
     /**
      * Output for the order received page.
      */
-    public function thankyou_page($order_id) {
-      $this->log('    [Info] Entered thankyou_page with order_id =  ' . $order_id);
-
+    public function thankyou_page($order_id)
+    {
       // Intentionally blank.
-
-      $this->log('    [Info] Leaving thankyou_page with order_id =  ' . $order_id);
     }
 
     /**
@@ -532,7 +625,8 @@ function woocommerce_alfacoins_init() {
      * @param   int $order_id
      * @return  array
      */
-    public function process_payment($order_id) {
+    public function process_payment($order_id)
+    {
       $this->log('    [Info] Entered process_payment() with order_id = ' . $order_id . '...');
 
       if (TRUE === empty($order_id)) {
@@ -561,10 +655,8 @@ function woocommerce_alfacoins_init() {
       }
       // Redirect URL & Notification URL
 
-      $this->log('    [Info] The variable redirect_url = ' . $redirect_url . '...');
       $hide_warning = $this->get_option('hide_warning');
-      $this->log('    [Info] Hide warning option is set to: ' . $hide_warning . '...');
-      $this->log('    [Info] Notification URL is now set to: ' . $notification_url . '...');
+
       if ($hide_warning == 'yes') {
         $hide_warning = 1;
       } else {
@@ -573,15 +665,12 @@ function woocommerce_alfacoins_init() {
       // Setup the currency
       $currency_code = get_woocommerce_currency();
 
-      $this->log('    [Info] The variable currency_code = ' . $currency_code . '...');
-
-
       $payerEmail = $order->billing_email;
       $payerName = $order->get_formatted_billing_full_name();
 
       $description = '';
       foreach ($order->get_items() as $item) {
-        $product = $order->get_product_from_item($item);
+        $product = $item->get_product();
         $description .= $product->get_title() . ', ';
       }
       if (!empty($description)) {
@@ -620,26 +709,20 @@ function woocommerce_alfacoins_init() {
         if (!empty($result['error'])) {
           $this->log('    [Error] API ' . $result['error']);
           return array(
-            'result' => 'success',
+            'result' => 'error',
             'messages' => 'Sorry, but checkout with ALFAcoins does not appear to be working.'
           );
-        }
-        else {
+        } else {
           $this->log('    [Info] Call to generate invoice was successful');
         }
-
       } catch (Exception $e) {
         $this->log('    [Error] Error generating invoice for ' . $order->get_order_number() . ', error: ' . $e->getMessage());
 
         return array(
-          'result' => 'success',
+          'result' => 'error',
           'messages' => 'Sorry, but checkout with ALFAcoins does not appear to be working.'
         );
-
       }
-
-      // Reduce stock levels
-      $order->reduce_order_stock();
 
       // Remove cart
       WC()->cart->empty_cart();
@@ -653,9 +736,11 @@ function woocommerce_alfacoins_init() {
       );
     }
 
-    public function ipn_callback() {
+    public function ipn_callback()
+    {
       $this->log('    [Info] Entered ipn_callback()...');
-      if (!empty($_POST['id'])
+      if (
+        !empty($_POST['id'])
         && !empty($_POST['coin_received_amount'])
         && !empty($_POST['modified'])
         && !empty($_POST['received_amount'])
@@ -671,11 +756,11 @@ function woocommerce_alfacoins_init() {
         $_POST['received_amount'] = round((float) $_POST['received_amount'], 8);
         $_POST['order_id'] = (int) $_POST['order_id'];
         // UPPERCASE
-        $_POST['hash'] = preg_replace("/[^A-Z0-9]/","",$_POST['hash']);
+        $_POST['hash'] = preg_replace("/[^A-Z0-9]/", "", $_POST['hash']);
         // LOWERCASE
-        $_POST['currency'] = substr(preg_replace("/[^A-Z]/", '', $_POST['currency']),0,3);
-        $_POST['status'] = preg_replace("/[^a-z]/","",$_POST['status']);
-        $_POST['type'] = preg_replace("/[^a-z]/","",$_POST['type']);
+        $_POST['currency'] = substr(preg_replace("/[^A-Z]/", '', $_POST['currency']), 0, 3);
+        $_POST['status'] = preg_replace("/[^a-z]/", "", $_POST['status']);
+        $_POST['type'] = preg_replace("/[^a-z]/", "", $_POST['type']);
 
         // since we only need the md5 checksum of that POST string to verify the payment
         // we don't need to validate and sanitize all params  at this step.
@@ -695,8 +780,7 @@ function woocommerce_alfacoins_init() {
           if (FALSE === $order || 'WC_Order' !== get_class($order)) {
             $this->log('    [Error] The ALFAcoins payment plugin was called to process an IPN message but could not retrieve the order details for order_id: "' . $order_id . '". If you use an alternative order numbering system, please see class-wc-gateway-alfacoins.php to apply a search filter.');
             throw new \Exception('The ALFAcoins payment plugin was called to process an IPN message but could not retrieve the order details for order_id ' . $order_id . '. Cannot continue!');
-          }
-          else {
+          } else {
             $this->log('    [Info] Order details retrieved successfully...');
           }
 
@@ -705,8 +789,7 @@ function woocommerce_alfacoins_init() {
           if (FALSE === isset($current_status) && TRUE === empty($current_status)) {
             $this->log('    [Error] The ALFAcoins payment plugin was called to process an IPN message but could not obtain the current status from the order.');
             throw new \Exception('The ALFAcoins payment plugin was called to process an IPN message but could not obtain the current status from the order. Cannot continue!');
-          }
-          else {
+          } else {
             $this->log('    [Info] The current order status for this order is ' . $current_status);
           }
 
@@ -726,21 +809,20 @@ function woocommerce_alfacoins_init() {
             // Based on the payment status parameter for this
             // IPN, we will update the current order status.
             switch ($checkStatus) {
-              // The "paid" IPN message is received almost
-              // immediately after the ALFAcoins invoice is paid.
+                // The "paid" IPN message is received almost
+                // immediately after the ALFAcoins invoice is paid.
               case 'paid':
 
                 $this->log('    [Info] IPN response is a "paid" message.');
 
-                if ($current_status == $complete_status ||
+                if (
+                  $current_status == $complete_status ||
                   'wc_' . $current_status == $complete_status ||
                   $current_status == 'completed'
                 ) {
                   $error_string = 'Paid IPN, but order has status: ' . $current_status;
                   $this->log("    [Warning] $error_string");
-
-                }
-                else {
+                } else {
                   $this->log('    [Info] This order has not been updated yet so setting new status...');
 
                   $order->update_status($paid_status);
@@ -749,21 +831,20 @@ function woocommerce_alfacoins_init() {
 
                 break;
 
-              // The complete status is when the Cryptocurrency network
-              // obtains 6 confirmations for this transaction.
+                // The complete status is when the Cryptocurrency network
+                // obtains 6 confirmations for this transaction.
               case 'completed':
 
                 $this->log('    [Info] IPN response is a "complete" message.');
 
-                if ($current_status == $complete_status ||
+                if (
+                  $current_status == $complete_status ||
                   'wc_' . $current_status == $complete_status ||
                   $current_status == 'completed'
                 ) {
                   $error_string = 'Completed IPN, but order has status: ' . $current_status;
                   $this->log("    [Warning] $error_string");
-
-                }
-                else {
+                } else {
                   $this->log('    [Info] This order has not been updated yet so setting complete status...');
 
                   $order->payment_complete();
@@ -773,22 +854,21 @@ function woocommerce_alfacoins_init() {
 
                 break;
 
-              // This order is invalid for some reason.
-              // Either it's a double spend or some other
-              // problem occurred.
+                // This order is invalid for some reason.
+                // Either it's a double spend or some other
+                // problem occurred.
               case 'expired':
 
                 $this->log('    [Info] IPN response is a "invalid" message.');
 
-                if ($current_status == $complete_status ||
+                if (
+                  $current_status == $complete_status ||
                   'wc_' . $current_status == $complete_status ||
                   $current_status == 'completed'
                 ) {
                   $error_string = 'Expireds IPN, but order has status: ' . $current_status;
                   $this->log("    [Warning] $error_string");
-
-                }
-                else {
+                } else {
                   $this->log('    [Info] This order has a problem so setting "cancelled" status...');
 
                   $order->update_status($order_states['cancelled'], __('Payment is expired for this order! The payment was not confirmed by the network within 1 hour. Do not ship the product for this order!', 'alfacoins'));
@@ -796,7 +876,7 @@ function woocommerce_alfacoins_init() {
 
                 break;
 
-              // There was an unknown message received.
+                // There was an unknown message received.
               default:
 
                 $this->log('    [Info] IPN response is an unknown message type. See error message below:');
@@ -808,21 +888,19 @@ function woocommerce_alfacoins_init() {
             $this->log('    [Info] Received amount is less than required');
             $order->add_order_note(__('ATTENTION! Received amount is less than required', 'alfacoins'));
           }
-        }
-        else {
+        } else {
           $this->log('    [Warning] IPN response has invalid hash or currency');
         }
         die('WC_ALFACOINS');
-      }
-      else {
+      } else {
         wp_die('Invalid IPN');
       }
-
 
       $this->log('    [Info] Leaving ipn_callback()...');
     }
 
-    public function log($message) {
+    public function log($message)
+    {
       if (TRUE === isset($this->debug) && 'yes' == $this->debug) {
         if (FALSE === isset($this->logger) || TRUE === empty($this->logger)) {
           $this->logger = new WC_Logger();
@@ -831,13 +909,13 @@ function woocommerce_alfacoins_init() {
         $this->logger->add('alfacoins', $message);
       }
     }
-
   }
 
   /**
    * Add ALFAcoins Payment Gateway to WooCommerce
    **/
-  function wc_add_alfacoins($methods) {
+  function wc_add_alfacoins($methods)
+  {
     $methods[] = 'WC_Gateway_ALFAcoins';
 
     return $methods;
@@ -850,7 +928,8 @@ function woocommerce_alfacoins_init() {
    **/
   add_filter('plugin_action_links', 'alfacoins_plugin_action_links', 10, 2);
 
-  function alfacoins_plugin_action_links($links, $file) {
+  function alfacoins_plugin_action_links($links, $file)
+  {
     static $this_plugin;
 
     if (FALSE === isset($this_plugin) || TRUE === empty($this_plugin)) {
@@ -868,16 +947,46 @@ function woocommerce_alfacoins_init() {
   }
 
   add_action('wp_ajax_alfacoins_create_invoice', 'ajax_alfacoins_create_invoice');
+
+  add_action('woocommerce_blocks_loaded', 'woocommerce_alfacoins_woocommerce_block_support');
+
+  function woocommerce_alfacoins_woocommerce_block_support()
+  {
+    if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
+      require_once plugin_dir_path(__FILE__) . 'includes' . DIRECTORY_SEPARATOR . 'class-wc-alfacoins-blocks-support.php';
+      add_action(
+        'woocommerce_blocks_payment_method_type_registration',
+        function (Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry) {
+          $container = Automattic\WooCommerce\Blocks\Package::container();
+          // registers as shared instance.
+          $container->register(
+            WC_ALFAcoins_Blocks_Support::class,
+            function () {
+              return new WC_ALFAcoins_Blocks_Support();
+            }
+          );
+          $payment_method_registry->register(
+            $container->get(WC_ALFAcoins_Blocks_Support::class)
+          );
+        },
+        5
+      );
+    }
+  }
 }
 
-function woocommerce_alfa_request($url, $params) {
+function woocommerce_alfa_request($url, $params)
+{
   $content = json_encode($params);
 
   $curl = curl_init($url);
   curl_setopt($curl, CURLOPT_HEADER, FALSE);
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-  curl_setopt($curl, CURLOPT_HTTPHEADER,
-    array("Content-type: application/json; charset=UTF-8"));
+  curl_setopt(
+    $curl,
+    CURLOPT_HTTPHEADER,
+    array("Content-type: application/json; charset=UTF-8")
+  );
   curl_setopt($curl, CURLOPT_POST, TRUE);
   curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
 
@@ -886,18 +995,16 @@ function woocommerce_alfa_request($url, $params) {
   $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
   if ($status != 200) {
-    //die("Error: call to URL $url failed with status $status, response $json_response, curl_error " . curl_error($curl) . ", curl_errno " . curl_errno($curl));
     throw new \Exception("Error: call to URL $url failed with status $status, response $json_response, curl_error " . curl_error($curl) . ", curl_errno " . curl_errno($curl));
-
   }
 
   curl_close($curl);
 
-  $response = json_decode($json_response, TRUE);
-  return $response;
+  return json_decode($json_response, TRUE);
 }
 
-function woocommerce_alfacoins_failed_requirements() {
+function woocommerce_alfacoins_failed_requirements()
+{
   global $wp_version;
   global $woocommerce;
 
@@ -916,8 +1023,7 @@ function woocommerce_alfacoins_failed_requirements() {
   // WooCommerce required
   if (TRUE === empty($woocommerce)) {
     $errors[] = 'The WooCommerce plugin for WordPress needs to be installed and activated. Please contact your web server administrator for assistance.';
-  }
-  elseif (TRUE === version_compare($woocommerce->version, '2.2', '<')) {
+  } elseif (TRUE === version_compare($woocommerce->version, '2.2', '<')) {
     $errors[] = 'Your WooCommerce version is too old. The ALFAcoins payment plugin requires WooCommerce 2.2 or higher to function. Your version is ' . $woocommerce->version . '. Please contact your web server administrator for assistance.';
   }
 
@@ -928,15 +1034,14 @@ function woocommerce_alfacoins_failed_requirements() {
 
   if (FALSE === empty($errors)) {
     return implode("<br>\n", $errors);
-  }
-  else {
+  } else {
     return FALSE;
   }
-
 }
 
 // Activating the plugin
-function woocommerce_alfacoins_activate() {
+function woocommerce_alfacoins_activate()
+{
   // Check for Requirements
   $failed = woocommerce_alfacoins_failed_requirements();
 
@@ -944,9 +1049,8 @@ function woocommerce_alfacoins_activate() {
 
   // Requirements met, activate the plugin
   if ($failed === FALSE) {
-    update_option('woocommerce_alfacoins_version', '0.10');
-  }
-  else {
+    update_option('woocommerce_alfacoins_version', '1.0');
+  } else {
     // Requirements not met, return an error message
     wp_die($failed . '<br><a href="' . $plugins_url . '">Return to plugins screen</a>');
   }
