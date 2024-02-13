@@ -1,34 +1,39 @@
 === ALFAcoins for WooCommerce ===
 Contributors: alfacoins
 Donate link: https://www.alfacoins.com/demo
-Tags: bitcoin, litecoin, dogecoin, ethereum, payment
+Tags: bitcoin, litecoin, dogecoin, ethereum, crypto
 Requires at least: 4.3.1
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 1.0
+Stable tag: 1.1
 License: MIT
 License URI: https://raw.githubusercontent.com/alfacoins/woocommerce/master/license.txt
 
-Start accepting cryptocurrency with ease. Bitcoin, XRP, Ethereum, Tron, USDT and many more.
+Accept all major cryptocurrencies like Bitcoin, Ethereum, TRC-20 & ERC-20 Tether, TRX, Litecoin, XRP with ALFAcoins plugin for WooCommerce.
 
 == Description ==
 
-Unlock the world of cryptocurrency payments effortlessly with ALFAcoins, the ultimate WooCommerce plugin designed for merchants ready to embrace the future of transactions. With just a click, transform your online store into a cryptocurrency-friendly platform, allowing you to accept payments in Bitcoin, XRP, Ethereum, Tron, USDT, and many more.
+Accept all major cryptocurrencies like Bitcoin, Ethereum, TRC-20 & ERC-20 Tether, TRX, Litecoin, XRP with ALFAcoins plugin for WooCommerce.
 
-= Key Features: =
+= ALFAcoins features: =
 
-* One-Click Integration: Simplify the process of accepting cryptocurrencies on your WooCommerce store. With ALFAcoins, it takes just one click to initiate seamless integration.
-* Diverse Cryptocurrency Support: Cater to a global audience by accepting a variety of cryptocurrencies, including Bitcoin, XRP, Ethereum, Tron, USDT, and more. Expand your customer base and offer them the flexibility they desire.
-* User-Friendly Configuration: No technical expertise required. Our intuitive configuration settings make it easy for merchants of all levels to set up and start accepting cryptocurrency payments quickly.
-* Real-Time Currency Conversion: Automatically convert cryptocurrency payments into your preferred fiat currency, ensuring you always know the exact value of each transaction.
-* Secure and Reliable: Trust in the security of your transactions. ALFAcoins prioritizes the safety of your payments, providing a secure environment for both merchants and customers.
+* Select preferred cryptocurrencies (BTC, ETH, USDT, BNB, XRP, USDC, DOGE, TRX, DOT, BCH, LTC, DAI, ATOM, XLM, DASH) and start accepting cryptocurrency.
+* Follow a straightforward set-up process, no technical expertise needed: [guide](https://www.alfacoins.com/help/tutorials/merchant-how-to-integrate-cryptocurrency-payments-to-wordpress-with-woocommerce).
+* Every transaction is displayed with an equivalent of your preferred fiat currency.
+* Automate withdrawals by setting up preferred period and amount.
+* Protect your account with a two-factor authentication (2FA) feature.
+* Check your transactions' history, statuses and fees. Export data and reports on the go.
 
-= Why Choose ALFAcoins: =
+= Why ALFAcoins? =
 
-* Effortless Setup: Save time and energy with our user-friendly setup process. Within moments, your store will be equipped to accept cryptocurrency payments seamlessly.
-* Global Reach: Tap into the global market by offering customers the convenience of paying with their preferred cryptocurrencies.
-* Stay Ahead of the Curve: Position your business at the forefront of technology and innovation. Be a pioneer in providing diverse payment options to your customers.
-* Don't miss out on the opportunities presented by the evolving landscape of digital payments. Install ALFAcoins plugin today and watch your WooCommerce store thrive in the world of cryptocurrencies.
+* Hassle free account opening process, application review guaranteed within 24 hours.
+* Submit your queries about integration, account or transaction management to our support team.
+* Open your e-shop to customers worldwide preferring crypto payments.
+* Real-time competitive cryptocurrency exchange rates.
+* Financial reports about incoming and outgoing operations.
+* Secure storage and instant transfers of your crypto assets.
+
+[Join](https://www.alfacoins.com/user/register) the digital payment revolution and expand your WooCommerce store's potential with ALFAcoins. Embrace the opportunities of cryptocurrency and set your business up for success.
 
 == Installation ==
 
@@ -51,13 +56,18 @@ Download the plugin and upload it to your webserver via the [directions found at
 
 == Screenshots ==
 
-1. When selected, this is how the payment option will appear
-2. This is the ALFAcoins invoice page a customer will be sent to during checkout after selecting this plugin's payment option
-3. After customer have paid, he will be prompted to return to your site
-4. The checkout will indicate they paid with Cryptocurrency
-5. The settings page for this plugin
+1. The cart page features a "Proceed to Checkout" button adorned with icons.
+2. Upon selection, this is the appearance of the chosen payment option.
+3. This is the ALFAcoins invoice page to which a customer will be directed during checkout after choosing this plugin's payment method.
+4. Following the customer's payment, they will receive a prompt to return to your site.
+5. The checkout will clearly denote that the payment was made using cryptocurrency.
+6. The plugin's settings page.
+7. The option to choose from available cryptocurrency icons on the checkout page.
 
 == Changelog ==
+
+= 1.1 - 2024-02-13 =
+Updated screenshots
 
 = 1.0 - 2024-02-09 =
 * New cryptocurrency supported: USDT, USDC, DAI, Binance Smartchain, Tron, Polkadot, Cosmos, Cardano, Dogecoin

@@ -1011,7 +1011,7 @@ function woocommerce_alfacoins_failed_requirements()
   $errors = array();
 
   // PHP 5.4+ required
-  if (TRUE === version_compare(PHP_VERSION, '5.4.0', '<')) {
+  if (TRUE === version_compare(PHP_VERSION, '7.4.0', '<')) {
     $errors[] = 'Your PHP version is too old. The ALFAcoins payment plugin requires PHP 5.4 or higher to function. Please contact your web server administrator for assistance.';
   }
 
@@ -1049,7 +1049,7 @@ function woocommerce_alfacoins_activate()
 
   // Requirements met, activate the plugin
   if ($failed === FALSE) {
-    update_option('woocommerce_alfacoins_version', '1.0');
+    update_option('woocommerce_alfacoins_version', '1.1');
   } else {
     // Requirements not met, return an error message
     wp_die($failed . '<br><a href="' . $plugins_url . '">Return to plugins screen</a>');
